@@ -30,13 +30,13 @@
 
         <div class="card">
             <form id="orderForm">
-                <input type="text" id="phone" class="input-field" placeholder="رقم العميل" required>
-                <input type="text" id="target" class="input-field" placeholder="الرقم المطلوب" required>
-                <input type="number" id="mins" class="input-field" placeholder="عدد الدقائق" oninput="updatePaymentUI()" required>
+                <input type="text" id="phone" class="input-field" placeholder="رقم هاتفكم" required>
+                <input type="text" id="target" class="input-field" placeholder="الرقم الارتري" required>
+                <input type="number" id="mins" class="input-field" placeholder="اختيار عدد الدقايق " oninput="updatePaymentUI()" required>
                 
                 <select id="paymentMethod" class="input-field" onchange="updatePaymentUI()" required>
-                    <option value="" id="opt0">اختر طريقة الدفع...</option>
-                    <option value="vodafone" id="opt1">فودافون كاش</option>
+                    <option value="" id="opt0">اختيار طريقة الدفع...</option>
+                    <option value="vodafone" id="opt1">فودافون كاش (مصر)</option>
                     <option value="bankak" id="opt2">تطبيق بنكك (سوداني)</option>
                 </select>
 
@@ -47,14 +47,14 @@
                 
                 <button type="submit" class="btn" id="submitBtn">ارسال الطلب</button>
             </form>
-            <a href="https://wa.me/01142007270" target="_blank" class="whatsapp-link" id="waLink">📞 تواصل معنا في حال حدوث خطأ</a>
+            <a href="https://wa.me/00201142007270" target="_blank" class="whatsapp-link" id="waLink">📞 تواصل معنا في حال حدوث خطأ</a>
         </div>
     </div>
 
     <script>
         window.setLanguage = function(lang) {
             const dict = {
-                ar: { phone: "رقم العميل", target: "الرقم المطلوب", mins: "عدد الدقائق", opt0: "اختر طريقة الدفع...", opt1: "فودافون كاش", opt2: "تطبيق بنكك (سوداني)", btn: "ارسال الطلب", label: "صورة الإيصال:", wa: "📞 تواصل معنا في حال حدوث خطأ" },
+                ar: { phone: "رقم هاتفكم", target: "الرقم الارتري", mins: "اختيار عدد الدقايق ", opt0: "اختيار طريقة الدفع...", opt1: "فودافون كاش (مصر)", opt2: "تطبيق بنكك (سوداني)", btn: "ارسال الطلب", label: "صورة الإيصال:", wa: "📞 تواصل معنا في حال حدوث خطأ" },
                 ti: { phone: "ቁጽሪ ተለፍንካ", target: "ቁጽሪ ዓሚልኩም", mins: "ቁጽሪ ደቃይቅ", opt0: " ምኸፋል ምመራጵ...", opt1: "ቮዳፎን ካሽ", opt2: "ኣፕሊኬሽን በንክክ (ሱዳን)", btn: "ክፍሊት ኣቐምጥ", label: "ስእሊ መረጋገጺ:", wa: "📞 ጌጋ እንተ ኣጋጢሙ ተራኸቡና" }
             };
             document.getElementById("htmlTag").dir = (lang === 'ar') ? 'rtl' : 'ltr';
@@ -76,13 +76,13 @@
             const box = document.getElementById("instructionsBox");
             const lang = document.getElementById("htmlTag").dir === 'rtl' ? 'ar' : 'ti';
             if (!mins || !method) { box.style.display = "none"; return; }
-            const cost = method === "vodafone" ? mins * 5 : mins * 10000;
+            const cost = method === "vodafone" ? mins * 5 : mins * 500;
             box.style.direction = (lang === 'ar') ? 'rtl' : 'ltr';
             box.style.textAlign = (lang === 'ar') ? 'right' : 'left';
             if (lang === 'ar') {
-                box.innerHTML = method === "vodafone" ? `التحويل لفودافون: 010XXXXXXXX <br> المبلغ: ${cost} جنيه` : `التحويل لبنكك: 123456789 <br> المبلغ: ${cost} ج.س`;
+                box.innerHTML = method === "vodafone" ? `الرجاء التحويل لهذا الرقم لفودافون كاش: 01142007343  <br> المبلغ: ${cost} جنيه` : `التحويل لبنكك: 123456789 <br> المبلغ: ${cost} ج.س`;
             } else {
-                box.innerHTML = method === "vodafone" ? `ቮዳፎን ካሽ: 010XXXXXXXX <br> ጠቕላላ ክፍሊት: ${cost} ጀነሀ` : `ባንክክ: 123456789 <br> ጠቕላላ ክፍሊት: ${cost} ጀነሀ ሱዳኒ`;
+                box.innerHTML = method === "vodafone" ? `ኣብዚኣ ትሌፍን ቮዳፎን ካሽ ሓውሉ: 01142007343 <br> ጠቕላላ ክፍሊት: ${cost} ጀነሀ` : `ኣብዚኣ ባንክክ ሓውሉ: 123456789 <br> ጠቕላላ ክፍሊት: ${cost} ጀነሀ ሱዳኒ`;
             }
             box.style.display = "block";
         }
@@ -103,25 +103,61 @@
 }; /* البيانات الخاصة بك */ 
         const db = getFirestore(initializeApp(firebaseConfig));
 
-        document.getElementById("orderForm").onsubmit = async function(e) {
-            e.preventDefault();
-            const file = document.getElementById("receiptImage").files[0];
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-                await addDoc(collection(db, "Orders"), {
-                    customerPhone: document.getElementById("phone").value,
-                    targetPhone: document.getElementById("target").value,
-                    minutes: document.getElementById("mins").value,
-                    paymentMethod: document.getElementById("paymentMethod").value,
-                    receiptImage: event.target.result,
-                    timestamp: new Date()
-                });
-                alert("تم استلام طلبك بنجاح!");
-                document.getElementById("orderForm").reset();
-                document.getElementById("instructionsBox").style.display = "none";
-            };
-            reader.readAsDataURL(file);
+document.getElementById("orderForm").onsubmit = async function (e) {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById("submitBtn");
+
+    // منع الضغط أكثر من مرة
+    submitBtn.disabled = true;
+    submitBtn.innerText = "جاري إرسال الطلب...";
+
+    const file = document.getElementById("receiptImage").files[0];
+
+    if (!file) {
+        alert("يرجى اختيار صورة الإيصال");
+        submitBtn.disabled = false;
+        submitBtn.innerText = "ارسال الطلب";
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = async (event) => {
+        try {
+            await addDoc(collection(db, "Orders"), {
+                customerPhone: document.getElementById("phone").value,
+                targetPhone: document.getElementById("target").value,
+                minutes: document.getElementById("mins").value,
+                paymentMethod: document.getElementById("paymentMethod").value,
+                receiptImage: event.target.result,
+                timestamp: new Date()
+            });
+
+            alert("✅ تم استلام طلبك بنجاح!");
+
+            document.getElementById("orderForm").reset();
+            document.getElementById("instructionsBox").style.display = "none";
+
+        } catch (error) {
+            console.error(error);
+            alert("حدث خطأ أثناء إرسال الطلب:\n" + error.message);
         }
+
+        // إعادة تفعيل الزر
+        submitBtn.disabled = false;
+        submitBtn.innerText = "ارسال الطلب";
+    };
+
+    reader.onerror = function () {
+        alert("حدث خطأ أثناء قراءة الصورة.");
+
+        submitBtn.disabled = false;
+        submitBtn.innerText = "ارسال الطلب";
+    };
+
+    reader.readAsDataURL(file);
+};
     </script>
 </body>
 </html>
