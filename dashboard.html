@@ -47,19 +47,28 @@
         };
 
         const db = getFirestore(initializeApp(firebaseConfig));
+        
+        // إعداد الصوت للتنبيه
+        const notificationSound = new Audio('https://actions.google.com/sounds/v1/notifications/beep_short.ogg');
+        let isFirstLoad = true;
 
-        // ترتيب تصاعدي (الأقدم أولاً)
         const q = query(collection(db, "Orders"), orderBy("timestamp", "asc"));
 
         onSnapshot(q, (snapshot) => {
             const ordersBody = document.getElementById("ordersBody");
+            
+            // تشغيل الصوت عند وصول طلب جديد بعد التحميل الأول
+            if (!isFirstLoad && snapshot.docChanges().some(change => change.type === "added")) {
+                notificationSound.play().catch(e => console.log("يرجى النقر في أي مكان في الصفحة لتفعيل التنبيه الصوتي"));
+            }
+            isFirstLoad = false;
+
             ordersBody.innerHTML = "";
             let counter = 1;
             
             snapshot.forEach((doc) => {
                 const d = doc.data();
                 
-                // تحويل الوقت
                 let dateString = "غير متاح";
                 let timeString = "";
                 if (d.timestamp) {

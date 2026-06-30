@@ -54,8 +54,8 @@
     <script>
         window.setLanguage = function(lang) {
             const dict = {
-                ar: { phone: "رقم هاتفكم", target: "الرقم الارتري", mins: "اختيار عدد الدقايق ", opt0: "اختيار طريقة الدفع...", opt1: "فودافون كاش (مصر)", opt2: "تطبيق بنكك (سوداني)", btn: "ارسال الطلب", label: "صورة الإيصال:", wa: "📞 تواصل معنا في حال حدوث خطأ" },
-                ti: { phone: "ቁጽሪ ተለፍንካ", target: "ቁጽሪ ዓሚልኩም", mins: "ቁጽሪ ደቃይቅ", opt0: " ምኸፋል ምመራጵ...", opt1: "ቮዳፎን ካሽ", opt2: "ኣፕሊኬሽን በንክክ (ሱዳን)", btn: "ክፍሊት ኣቐምጥ", label: "ስእሊ መረጋገጺ:", wa: "📞 ጌጋ እንተ ኣጋጢሙ ተራኸቡና" }
+                ar: { phone: "رقم هاتفكم", target: "الرقم الارتري", mins: "اختيار عدد الدقايق ", opt0: "اختيار طريقة الدفع...", opt1: "فودافون كاش (مصر)", opt2: "تطبيق بنكك (سوداني)", btn: "ارسال الطلب", label: "صورة الإيصال:", wa: "📞 تواصل معنا في حال حدوث خطأ", success: "✅ تم استلام طلبك بنجاح!", sending: "جاري إرسال الطلب...", error: "حدث خطأ أثناء إرسال الطلب:\n" },
+                ti: { phone: "ቁጽሪ ተለፎንኩም", target: "ቁጽሪ ኤርትራ", mins: "ቁጽሪ ደቃይቅ", opt0: "ሜላ ክፍሊት ምረጹ...", opt1: "ቮዳፎን ካሽ (ምስሪ)", opt2: "ኣፕሊኬሽን በንክክ (ሱዳን)", btn: "ሕቶ ልኣኽ", label: "ስእሊ መረጋገጺ ክፍሊት:", wa: "📞 ጌጋ እንተ ኣጋጢሙ ተራኸቡና", success: "✅ ሕቶኹም ብዓወት ተቐቢልናዮ!", sending: "ሕቶ ይልኣኽ ኣሎ...", error: "ሕቶ ኣብ ምልኣኽ ጌጋ ተፈጢሩ:\n" }
             };
             document.getElementById("htmlTag").dir = (lang === 'ar') ? 'rtl' : 'ltr';
             document.getElementById("phone").placeholder = dict[lang].phone;
@@ -82,7 +82,7 @@
             if (lang === 'ar') {
                 box.innerHTML = method === "vodafone" ? `الرجاء التحويل لهذا الرقم لفودافون كاش: 01142007343  <br> المبلغ: ${cost} جنيه` : `التحويل لبنكك: 123456789 <br> المبلغ: ${cost} ج.س`;
             } else {
-                box.innerHTML = method === "vodafone" ? `ኣብዚኣ ትሌፍን ቮዳፎን ካሽ ሓውሉ: 01142007343 <br> ጠቕላላ ክፍሊት: ${cost} ጀነሀ` : `ኣብዚኣ ባንክክ ሓውሉ: 123456789 <br> ጠቕላላ ክፍሊት: ${cost} ጀነሀ ሱዳኒ`;
+                box.innerHTML = method === "vodafone" ? `ናብዚ ቮዳፎን ካሽ ቁጽሪ ኣመሓላልፉ: 01142007343 <br> ጠቕላላ ክፍሊት: ${cost} جنيه` : `ናብዚ በንክክ ኣመሓላልፉ: 123456789 <br> ጠቕላላ ክፍሊት: ${cost} ج.س`;
             }
             box.style.display = "block";
         }
@@ -92,72 +92,64 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
-        // ضع بياناتك هنا
         const firebaseConfig = {apiKey: "AIzaSyDYdzHC9JgMB5DqpinrJuD94DpW-AqTzoI",
-  authDomain: "erycall.firebaseapp.com",
-  projectId: "erycall",
-  storageBucket: "erycall.firebasestorage.app",
-  messagingSenderId: "591098828614",
-  appId: "1:591098828614:web:2ef51420baf48bfc173747",
-  measurementId: "G-6KB5HBQ2S9"
-}; /* البيانات الخاصة بك */ 
+          authDomain: "erycall.firebaseapp.com",
+          projectId: "erycall",
+          storageBucket: "erycall.firebasestorage.app",
+          messagingSenderId: "591098828614",
+          appId: "1:591098828614:web:2ef51420baf48bfc173747",
+          measurementId: "G-6KB5HBQ2S9"
+        };
         const db = getFirestore(initializeApp(firebaseConfig));
 
-document.getElementById("orderForm").onsubmit = async function (e) {
-    e.preventDefault();
+        document.getElementById("orderForm").onsubmit = async function (e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById("submitBtn");
+            const lang = document.getElementById("htmlTag").dir === 'rtl' ? 'ar' : 'ti';
+            const dict = {
+                ar: { sending: "جاري إرسال الطلب...", success: "✅ تم استلام طلبك بنجاح!", error: "حدث خطأ أثناء إرسال الطلب:\n", failRead: "حدث خطأ أثناء قراءة الصورة.", chooseFile: "يرجى اختيار صورة الإيصال" },
+                ti: { sending: "ሕቶ ይልኣኽ ኣሎ...", success: "✅ ሕቶኹም ብዓወት ተቐቢልናዮ!", error: "ሕቶ ኣብ ምልኣኽ ጌጋ ተፈጢሩ:\n", failRead: "ስእሊ ኣብ ምንባብ ጌጋ ተፈጢሩ።", chooseFile: "በጃኹም ስእሊ መረጋገጺ ክፍሊት ምረጹ" }
+            };
 
-    const submitBtn = document.getElementById("submitBtn");
+            submitBtn.disabled = true;
+            submitBtn.innerText = dict[lang].sending;
 
-    // منع الضغط أكثر من مرة
-    submitBtn.disabled = true;
-    submitBtn.innerText = "جاري إرسال الطلب...";
+            const file = document.getElementById("receiptImage").files[0];
+            if (!file) {
+                alert(dict[lang].chooseFile);
+                submitBtn.disabled = false;
+                submitBtn.innerText = document.getElementById("submitBtn").innerText = (lang === 'ar') ? "ارسال الطلب" : "ሕቶ ልኣኽ";
+                return;
+            }
 
-    const file = document.getElementById("receiptImage").files[0];
-
-    if (!file) {
-        alert("يرجى اختيار صورة الإيصال");
-        submitBtn.disabled = false;
-        submitBtn.innerText = "ارسال الطلب";
-        return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = async (event) => {
-        try {
-            await addDoc(collection(db, "Orders"), {
-                customerPhone: document.getElementById("phone").value,
-                targetPhone: document.getElementById("target").value,
-                minutes: document.getElementById("mins").value,
-                paymentMethod: document.getElementById("paymentMethod").value,
-                receiptImage: event.target.result,
-                timestamp: new Date()
-            });
-
-            alert("✅ تم استلام طلبك بنجاح!");
-
-            document.getElementById("orderForm").reset();
-            document.getElementById("instructionsBox").style.display = "none";
-
-        } catch (error) {
-            console.error(error);
-            alert("حدث خطأ أثناء إرسال الطلب:\n" + error.message);
-        }
-
-        // إعادة تفعيل الزر
-        submitBtn.disabled = false;
-        submitBtn.innerText = "ارسال الطلب";
-    };
-
-    reader.onerror = function () {
-        alert("حدث خطأ أثناء قراءة الصورة.");
-
-        submitBtn.disabled = false;
-        submitBtn.innerText = "ارسال الطلب";
-    };
-
-    reader.readAsDataURL(file);
-};
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    await addDoc(collection(db, "Orders"), {
+                        customerPhone: document.getElementById("phone").value,
+                        targetPhone: document.getElementById("target").value,
+                        minutes: document.getElementById("mins").value,
+                        paymentMethod: document.getElementById("paymentMethod").value,
+                        receiptImage: event.target.result,
+                        timestamp: new Date()
+                    });
+                    alert(dict[lang].success);
+                    document.getElementById("orderForm").reset();
+                    document.getElementById("instructionsBox").style.display = "none";
+                } catch (error) {
+                    console.error(error);
+                    alert(dict[lang].error + error.message);
+                }
+                submitBtn.disabled = false;
+                submitBtn.innerText = (lang === 'ar') ? "ارسال الطلب" : "ሕቶ ልኣኽ";
+            };
+            reader.onerror = function () {
+                alert(dict[lang].failRead);
+                submitBtn.disabled = false;
+                submitBtn.innerText = (lang === 'ar') ? "ارسال الطلب" : "ሕቶ ልኣኽ";
+            };
+            reader.readAsDataURL(file);
+        };
     </script>
 </body>
 </html>
