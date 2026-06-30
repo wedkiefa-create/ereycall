@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlTag">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EryCall</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .main-container { width: 100%; max-width: 420px; }
+        .app-title { text-align: center; color: #b71c1c; margin-bottom: 20px; font-size: 28px; font-weight: bold; }
+        .card { background: white; border-radius: 15px; padding: 30px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 4px solid #b71c1c; }
+        .input-field { width: 100%; background-color: #f0f4f8; border: 1px solid #e1e5eb; padding: 15px; margin-bottom: 15px; border-radius: 10px; font-size: 16px; outline: none; text-align: inherit; }
+        .btn { width: 100%; background-color: #004b93; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .lang-switch { text-align: center; margin-bottom: 20px; }
+        .lang-btn { border: none; padding: 10px 20px; cursor: pointer; border-radius: 20px; margin: 0 5px; font-weight: bold; transition: 0.3s; }
+        .btn-ar { background-color: #1b7a43; color: white; } 
+        .btn-ti { background-color: #b71c1c; color: white; }
+        .whatsapp-link { display: block; text-align: center; margin-top: 20px; color: #25d366; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <h1 class="app-title">EryCall</h1>
+        <div class="lang-switch">
+            <button class="lang-btn btn-ar" onclick="setLanguage('ar')">العربية</button>
+            <button class="lang-btn btn-ti" onclick="setLanguage('ti')">ትግርኛ</button>
+        </div>
+
+        <div class="card">
+            <form id="orderForm">
+                <input type="text" id="phone" class="input-field" placeholder="رقم العميل" required>
+                <input type="text" id="target" class="input-field" placeholder="الرقم المطلوب" required>
+                <input type="number" id="mins" class="input-field" placeholder="عدد الدقائق" oninput="updatePaymentUI()" required>
+                
+                <select id="paymentMethod" class="input-field" onchange="updatePaymentUI()" required>
+                    <option value="" id="opt0">اختر طريقة الدفع...</option>
+                    <option value="vodafone" id="opt1">فودافون كاش</option>
+                    <option value="bankak" id="opt2">تطبيق بنكك (سوداني)</option>
+                </select>
+
+                <div id="instructionsBox" style="display:none; background:#e8f4fd; padding:15px; margin-bottom:15px; border-right:4px solid #004b93; color:#1a3a5f; line-height:1.6;"></div>
+                
+                <label id="labelReceipt" style="display:block; margin-bottom:5px; font-weight:bold;">صورة الإيصال:</label>
+                <input type="file" id="receiptImage" class="input-field" accept="image/*" required>
+                
+                <button type="submit" class="btn" id="submitBtn">ارسال الطلب</button>
+            </form>
+            <a href="https://wa.me/01142007270" target="_blank" class="whatsapp-link" id="waLink">📞 تواصل معنا في حال حدوث خطأ</a>
+        </div>
+    </div>
+
+    <script>
+        window.setLanguage = function(lang) {
+            const dict = {
+                ar: { phone: "رقم العميل", target: "الرقم المطلوب", mins: "عدد الدقائق", opt0: "اختر طريقة الدفع...", opt1: "فودافون كاش", opt2: "تطبيق بنكك (سوداني)", btn: "ارسال الطلب", label: "صورة الإيصال:", wa: "📞 تواصل معنا في حال حدوث خطأ" },
+                ti: { phone: "ቁጽሪ ተለፍንካ", target: "ቁጽሪ ዓሚልኩም", mins: "ቁጽሪ ደቃይቅ", opt0: " ምኸፋል ምመራጵ...", opt1: "ቮዳፎን ካሽ", opt2: "ኣፕሊኬሽን በንክክ (ሱዳን)", btn: "ክፍሊት ኣቐምጥ", label: "ስእሊ መረጋገጺ:", wa: "📞 ጌጋ እንተ ኣጋጢሙ ተራኸቡና" }
+            };
+            document.getElementById("htmlTag").dir = (lang === 'ar') ? 'rtl' : 'ltr';
+            document.getElementById("phone").placeholder = dict[lang].phone;
+            document.getElementById("target").placeholder = dict[lang].target;
+            document.getElementById("mins").placeholder = dict[lang].mins;
+            document.getElementById("opt0").innerText = dict[lang].opt0;
+            document.getElementById("opt1").innerText = dict[lang].opt1;
+            document.getElementById("opt2").innerText = dict[lang].opt2;
+            document.getElementById("submitBtn").innerText = dict[lang].btn;
+            document.getElementById("labelReceipt").innerText = dict[lang].label;
+            document.getElementById("waLink").innerText = dict[lang].wa;
+            updatePaymentUI();
+        };
+
+        window.updatePaymentUI = function() {
+            const mins = document.getElementById("mins").value;
+            const method = document.getElementById("paymentMethod").value;
+            const box = document.getElementById("instructionsBox");
+            const lang = document.getElementById("htmlTag").dir === 'rtl' ? 'ar' : 'ti';
+            if (!mins || !method) { box.style.display = "none"; return; }
+            const cost = method === "vodafone" ? mins * 5 : mins * 5000;
+            box.style.direction = (lang === 'ar') ? 'rtl' : 'ltr';
+            box.style.textAlign = (lang === 'ar') ? 'right' : 'left';
+            if (lang === 'ar') {
+                box.innerHTML = method === "vodafone" ? `التحويل لفودافون: 010XXXXXXXX <br> المبلغ: ${cost} جنيه` : `التحويل لبنكك: 123456789 <br> المبلغ: ${cost} ج.س`;
+            } else {
+                box.innerHTML = method === "vodafone" ? `ቮዳፎን ካሽ: 010XXXXXXXX <br> ጠቕላላ ክፍሊት: ${cost} ጀነሀ` : `ባንክክ: 123456789 <br> ጠቕላላ ክፍሊት: ${cost} ጀነሀ ሱዳኒ`;
+            }
+            box.style.display = "block";
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        
+        // ضع بياناتك هنا
+        const firebaseConfig = {apiKey: "AIzaSyDYdzHC9JgMB5DqpinrJuD94DpW-AqTzoI",
+  authDomain: "erycall.firebaseapp.com",
+  projectId: "erycall",
+  storageBucket: "erycall.firebasestorage.app",
+  messagingSenderId: "591098828614",
+  appId: "1:591098828614:web:2ef51420baf48bfc173747",
+  measurementId: "G-6KB5HBQ2S9"
+}; /* البيانات الخاصة بك */ 
+        const db = getFirestore(initializeApp(firebaseConfig));
+
+        document.getElementById("orderForm").onsubmit = async function(e) {
+            e.preventDefault();
+            const file = document.getElementById("receiptImage").files[0];
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                await addDoc(collection(db, "Orders"), {
+                    customerPhone: document.getElementById("phone").value,
+                    targetPhone: document.getElementById("target").value,
+                    minutes: document.getElementById("mins").value,
+                    paymentMethod: document.getElementById("paymentMethod").value,
+                    receiptImage: event.target.result,
+                    timestamp: new Date()
+                });
+                alert("تم استلام طلبك بنجاح!");
+                document.getElementById("orderForm").reset();
+                document.getElementById("instructionsBox").style.display = "none";
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>

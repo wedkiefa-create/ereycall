@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة تحكم EryCall</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f0f2f5; }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        th { background: #004b93; color: white; padding: 15px; text-align: center; }
+        td { padding: 15px; border-bottom: 1px solid #eee; text-align: center; }
+        tr:hover { background-color: #f9f9f9; }
+        img { width: 60px; height: 60px; border-radius: 5px; cursor: pointer; border: 1px solid #ccc; transition: 0.3s; }
+        img:hover { transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+    <h2>طلبات EryCall الواردة 📋</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>م</th>
+                <th>التاريخ والوقت</th>
+                <th>رقم العميل</th>
+                <th>الرقم المطلوب</th>
+                <th>الدقائق</th>
+                <th>طريقة الدفع</th>
+                <th>الإيصال</th>
+            </tr>
+        </thead>
+        <tbody id="ordersBody"></tbody>
+    </table>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYdzHC9JgMB5DqpinrJuD94DpW-AqTzoI",
+            authDomain: "erycall.firebaseapp.com",
+            projectId: "erycall",
+            storageBucket: "erycall.firebasestorage.app",
+            messagingSenderId: "591098828614",
+            appId: "1:591098828614:web:2ef51420baf48bfc173747",
+            measurementId: "G-6KB5HBQ2S9"
+        };
+
+        const db = getFirestore(initializeApp(firebaseConfig));
+
+        // ترتيب تصاعدي (الأقدم أولاً)
+        const q = query(collection(db, "Orders"), orderBy("timestamp", "asc"));
+
+        onSnapshot(q, (snapshot) => {
+            const ordersBody = document.getElementById("ordersBody");
+            ordersBody.innerHTML = "";
+            let counter = 1;
+            
+            snapshot.forEach((doc) => {
+                const d = doc.data();
+                
+                // تحويل الوقت
+                let dateString = "غير متاح";
+                let timeString = "";
+                if (d.timestamp) {
+                    const date = d.timestamp.toDate();
+                    dateString = date.toLocaleDateString('ar-EG');
+                    timeString = date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+                }
+
+                ordersBody.innerHTML += `
+                    <tr>
+                        <td>${counter++}</td>
+                        <td>${dateString} <br> <small>${timeString}</small></td>
+                        <td>${d.customerPhone}</td>
+                        <td>${d.targetPhone}</td>
+                        <td>${d.minutes}</td>
+                        <td>${d.paymentMethod === 'vodafone' ? 'فودافون كاش' : 'بنكك'}</td>
+                        <td><img src="${d.receiptImage}" onclick="window.open(this.src)"></td>
+                    </tr>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
