@@ -118,30 +118,43 @@
             if (!file) {
                 alert(dict[lang].chooseFile);
                 submitBtn.disabled = false;
-                submitBtn.innerText = document.getElementById("submitBtn").innerText = (lang === 'ar') ? "ارسال الطلب" : "ሕቶ ልኣኽ";
+                submitBtn.innerText = (lang === 'ar') ? "ارسال الطلب" : "ሕቶ ልኣኽ";
                 return;
             }
 
             const reader = new FileReader();
             reader.onload = async (event) => {
-                try {
-                    await addDoc(collection(db, "Orders"), {
-                        customerPhone: document.getElementById("phone").value,
-                        targetPhone: document.getElementById("target").value,
-                        minutes: document.getElementById("mins").value,
-                        paymentMethod: document.getElementById("paymentMethod").value,
-                        receiptImage: event.target.result,
-                        timestamp: new Date()
-                    });
-                    alert(dict[lang].success);
-                    document.getElementById("orderForm").reset();
-                    document.getElementById("instructionsBox").style.display = "none";
-                } catch (error) {
-                    console.error(error);
-                    alert(dict[lang].error + error.message);
-                }
-                submitBtn.disabled = false;
-                submitBtn.innerText = (lang === 'ar') ? "ارسال الطلب" : "ሕቶ ልኣኽ";
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = async () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.5);
+
+                    try {
+                        await addDoc(collection(db, "Orders"), {
+                            customerPhone: document.getElementById("phone").value,
+                            targetPhone: document.getElementById("target").value,
+                            minutes: document.getElementById("mins").value,
+                            paymentMethod: document.getElementById("paymentMethod").value,
+                            receiptImage: compressedDataUrl,
+                            timestamp: new Date()
+                        });
+                        alert(dict[lang].success);
+                        document.getElementById("orderForm").reset();
+                        document.getElementById("instructionsBox").style.display = "none";
+                    } catch (error) {
+                        console.error(error);
+                        alert(dict[lang].error + error.message);
+                    }
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = (lang === 'ar') ? "ارسال الطلب" : "ሕቶ ልኣኽ";
+                };
             };
             reader.onerror = function () {
                 alert(dict[lang].failRead);
