@@ -76,7 +76,7 @@
             const box = document.getElementById("instructionsBox");
             const lang = document.getElementById("htmlTag").dir === 'rtl' ? 'ar' : 'ti';
             if (!mins || !method) { box.style.display = "none"; return; }
-            const cost = method === "vodafone" ? mins * 5 : mins * 5000;
+            const cost = method === "vodafone" ? mins * 5 : mins * 10000;
             box.style.direction = (lang === 'ar') ? 'rtl' : 'ltr';
             box.style.textAlign = (lang === 'ar') ? 'right' : 'left';
             if (lang === 'ar') {
