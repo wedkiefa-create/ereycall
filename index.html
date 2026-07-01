@@ -52,7 +52,10 @@
             <a href="https://wa.me/00201142007270" target="_blank" class="whatsapp-link" id="waLink">📞 تواصل معنا في حال حدوث خطأ</a>
         </div>
     </div>
-
+<!-- زر التثبيت الجديد (ضع هذا الكود مباشرة تحته) -->
+<button id="btnInstall" style="display: none; padding: 15px; margin-top: 10px; background: #1e3a8a; color: white; border: none; border-radius: 10px; cursor: pointer; width: 100%;">
+ Download EryCall
+</button>
     <script>
         window.setLanguage = function(lang) {
             const dict = {
@@ -166,5 +169,32 @@
             reader.readAsDataURL(file);
         };
     </script>
+    <script>
+  let deferredPrompt;
+  const btnInstall = document.getElementById('btnInstall');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // منع المتصفح من إظهار زر التثبيت التلقائي الصغير
+    e.preventDefault();
+    // حفظ الحدث لاستخدامه لاحقاً
+    deferredPrompt = e;
+    // إظهار الزر الخاص بنا
+    btnInstall.style.display = 'block';
+  });
+
+  btnInstall.addEventListener('click', (e) => {
+    // إخفاء الزر بعد الضغط عليه
+    btnInstall.style.display = 'none';
+    // إظهار طلب التثبيت للمستخدم
+    deferredPrompt.prompt();
+    // انتظار اختيار المستخدم
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      }
+      deferredPrompt = null;
+    });
+  });
+</script>
 </body>
 </html>
